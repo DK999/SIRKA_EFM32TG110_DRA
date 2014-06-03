@@ -129,18 +129,18 @@ int main(void)
 		  {
 			  EMU_EnterEM1();
 		  }
-//  		  crc = 0x0000;
-//  		  for(int i = 0; i < (received_frame[LENGTH]-2) ; i++)
-//  		  {
-//  			  crc = CRC16(crc,received_frame[i]);
-//  		  }
-//  		  crc_ex = (uint16_t)received_frame[CRCH];               // Store CRC-m_checksum
-//  		  crc_ex <<= 8;
-//  		  crc_ex |= received_frame[CRCL];
+  		  crc = 0x0000;
+  		  for(int i = 0; i < (received_frame[LENGTH]-2) ; i++)
+  		  {
+  			  crc = CRC16(crc,received_frame[i]);
+  		  }
+  		  crc_ex = (uint16_t)received_frame[CRCH];               // Store CRC-m_checksum
+  		  crc_ex <<= 8;
+  		  crc_ex |= received_frame[CRCL];
   		  /*
   		   * Check if Preamble OK and frame fully received
   		   */
-  		  if(true)
+  		  if(crc == crc_ex)
   		  {
 		  if((received_frame[PREAMBLE_ONE] == 0xAA) && (received_frame[PREAMBLE_TWO] == 0xAA))
 			{
@@ -247,6 +247,12 @@ int main(void)
 						 */
 						case 0x14:	send_hello();
 									break;
+
+						case 0x15:	config[BOOT_FLAG] = 0x01;
+									ErasePage(flash_save);
+									WriteWord(flash_save,&config,16);
+									WDOG_Enable(true);
+									break;
 						/*  ########################################
 						 *  ########## 	DEBUG FUNCTIONS! ###########
 						 *  ########################################
@@ -289,10 +295,7 @@ int main(void)
 						case 0xFF: 	showDeviceID();
 									break;
 
-						default:	config[BOOT_FLAG] = 0x01;
-									ErasePage(flash_save);
-									WriteWord(flash_save,&config,16);
-									WDOG_Enable(true);
+						default:
 									break;
 					  } // End SWITCH
 
