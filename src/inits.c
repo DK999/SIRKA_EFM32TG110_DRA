@@ -89,6 +89,9 @@ void Clocks_Init(void)
 	  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;		// Set CoreDebug n CMSIS
 	  DWT->CTRL |= 1;										// Activate DWT								// Activate DWT
 
+	  /* Write MSC unlock code to enable interface */
+	  	  MSC->LOCK = MSC_UNLOCK_CODE;
+
 }
 
 //void reset_clocks(void)

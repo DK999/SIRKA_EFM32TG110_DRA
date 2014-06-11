@@ -10,7 +10,7 @@
 #define MSC_PROGRAM_TIMEOUT 10000000ul
 #define WORDS_PER_DATA_PHASE (1)
 
-int8_t ErasePage(uint32_t *startAddress)
+RAMFUNC int8_t ErasePage(uint32_t *startAddress)
 {
   int32_t      timeOut  = MSC_PROGRAM_TIMEOUT;
 
@@ -61,7 +61,7 @@ int8_t ErasePage(uint32_t *startAddress)
   return 0;
 }
 
-int8_t WriteWord(uint32_t *address, void const *data, int numBytes)
+RAMFUNC int8_t WriteWord(uint32_t *address, void const *data, int numBytes)
 {
   int wordCount;
   int numWords;

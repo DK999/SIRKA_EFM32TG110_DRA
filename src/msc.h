@@ -9,9 +9,10 @@
 #define MSC_H_
 
 #include "efm32tg110f32.h"
+#include "ramfunc.h"
 
-int8_t ErasePage(uint32_t *startAddress);
-int8_t WriteWord(uint32_t *address, void const *data, int numBytes);
+RAMFUNC int8_t ErasePage(uint32_t *startAddress);
+RAMFUNC int8_t WriteWord(uint32_t *address, void const *data, int numBytes);
 int8_t LoadData(uint32_t* data, int num);
 int8_t LoadAddress(uint32_t* address);
 #endif /* MSC_H_ */
