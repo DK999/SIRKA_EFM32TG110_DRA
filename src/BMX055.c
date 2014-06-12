@@ -23,13 +23,12 @@
 #define MAG_RES 3
 
 // GLOBAL VARIABLES
-extern uint32_t flash_save;
+extern uint32_t sirka_save;
 uint8_t XY = 0x01 ,Z = 0x02;
-extern uint8_t *address;
 extern uint8_t *acc_res;
 extern uint8_t *gyro_res;
 extern uint8_t *mag_res;
-extern uint8_t config[4];
+extern uint8_t sirka_config[8];
 
 void interface_init(){
 	  // Setup Clock Tree
@@ -307,12 +306,12 @@ void setup_Gyro_Range(uint8_t range){
 
 void setup_Address(uint8_t address)
 {
-	config[SIRKA_ADDRESS] = address;
-	config[ACC_RES] = *acc_res;
-	config[GYRO_RES] = *gyro_res;
-	config[MAG_RES] = *mag_res;
-	ErasePage(flash_save);
-	WriteWord(flash_save,&config,16);
+	sirka_config[SIRKA_ADDRESS] = address;
+	sirka_config[ACC_RES] = *acc_res;
+	sirka_config[GYRO_RES] = *gyro_res;
+	sirka_config[MAG_RES] = *mag_res;
+	ErasePage(sirka_save);
+	WriteWord(sirka_save,&sirka_config,8);
 }
 
 

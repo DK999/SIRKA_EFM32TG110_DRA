@@ -19,7 +19,7 @@
 #define USART_CS_PORT 2
 
 uint8_t print_byte_array[4] = { 0x30, 0x78, 0x20, 0x20 }; // array for displaying bytes one nibble at a time
-extern uint8_t config[4];
+extern uint8_t sirka_config[8];
 /*
  * ####### DEBUG FUNCTIONS #######
  */
@@ -271,7 +271,7 @@ void send_hello(void)
 	byte[1] = 0xAA;
 	byte[2] = 0x07;							// Setting Frame length (7 Byte)
 	byte[3] = 0x00;							// Setting Host Address
-	byte[4] = config[0];
+	byte[4] = sirka_config[0];
 
 	GPIO->P[USART_CS_PORT].DOUTSET = (1 << USART_CS_PIN);			// Set RS485 for Write
 

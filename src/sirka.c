@@ -34,10 +34,10 @@
 #define ACC_RES 1
 #define GYRO_RES 2
 #define MAG_RES 3
-#define CRC_PACK 4
-#define FILE_SIZE 6
-#define FW_CHECK 12
-#define BOOT_FLAG 13
+#define CRC_PACK 0
+#define FILE_SIZE 2
+#define FW_CHECK 6
+#define BOOT_FLAG 7
 
 enum sensors
 {
@@ -55,16 +55,18 @@ uint8_t settings_acc = 0x00;
 volatile uint8_t received_frame[30] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 volatile short frame_position = 0;
 
-uint32_t flash_save = 0x3800;
-uint8_t *address = (uint8_t*)0x3800;
-uint8_t *acc_res = (uint8_t*)0x3801;
-uint8_t *gyro_res = (uint8_t*)0x3802;
-uint8_t *mag_res = (uint8_t*)0x3803;
-uint16_t *crc_pack = (uint16_t*)0x3804;
-uint32_t *file_size = (uint32_t*)0x3806;
-uint8_t *fw_check = (uint8_t*)0x380C;
-uint8_t *boot_flag = (uint8_t*)0x380D;
-uint8_t config[16];
+uint32_t sirka_save = 0x7800;
+uint32_t boot_save = 0x3800;
+uint8_t *address = (uint8_t*)0x7800;
+uint8_t *acc_res = (uint8_t*)0x7801;
+uint8_t *gyro_res = (uint8_t*)0x7802;
+uint8_t *mag_res = (uint8_t*)0x7803;
+uint16_t *crc_pack = (uint16_t*)0x3800;
+uint32_t *file_size = (uint32_t*)0x3802;
+uint8_t *fw_check = (uint8_t*)0x3806;
+uint8_t *boot_flag = (uint8_t*)0x3807;
+uint8_t sirka_config[8] = { 0,0,0,0,0,0,0,0 };
+uint8_t boot_config[8] = { 0,0,0,0,0,0,0,0 };
 
 
 /**************************************************************************//**
@@ -73,46 +75,43 @@ uint8_t config[16];
 int main(void)
 { volatile uint16_t crc = 0x0000;					// Init CRC-Value
   volatile uint16_t crc_ex = 0x0000;
-  config[SIRKA_ADDRESS] = *address;
-  config[ACC_RES] = *acc_res;
-  config[GYRO_RES] = *gyro_res;
-  config[MAG_RES] = *mag_res;
-  config[CRC_PACK] = (uint8_t)*crc_pack;
-  config[CRC_PACK+1] = (uint8_t)(*crc_pack>>8);
-  config[FILE_SIZE] = (uint8_t)*file_size;
-  config[FILE_SIZE+1] = (uint8_t)(*file_size>>8);
-  config[FILE_SIZE+2] = (uint8_t)(*file_size>>16);
-  config[FILE_SIZE+3] = (uint8_t)(*file_size>>24);
-  config[10]= 0xFF;
-  config[11]= 0xFF;
-  config[FW_CHECK]= *fw_check;
-  config[BOOT_FLAG]= 0x00;
-  config[14]= 0x00;
-  config[15]= 0x00;
+  sirka_config[SIRKA_ADDRESS] = *address;
+  sirka_config[ACC_RES] = *acc_res;
+  sirka_config[GYRO_RES] = *gyro_res;
+  sirka_config[MAG_RES] = *mag_res;
+  boot_config[CRC_PACK] = (uint8_t)*crc_pack;
+  boot_config[CRC_PACK+1] = (uint8_t)(*crc_pack>>8);
+  boot_config[FILE_SIZE] = (uint8_t)*file_size;
+  boot_config[FILE_SIZE+1] = (uint8_t)(*file_size>>8);
+  boot_config[FILE_SIZE+2] = (uint8_t)(*file_size>>16);
+  boot_config[FILE_SIZE+3] = (uint8_t)(*file_size>>24);
+  boot_config[FW_CHECK]= *fw_check;
+  boot_config[BOOT_FLAG]= 0x00;
+
   /* Chip errata */
   CHIP_Init();
 
   /* Read Config from Flash */
-  if( config[SIRKA_ADDRESS] == 0 || config[SIRKA_ADDRESS] >127)
-	config[SIRKA_ADDRESS] = 0x01;
-  if(!( (config[GYRO_RES] == 0x00) | (config[GYRO_RES] == 0x01) | (config[GYRO_RES] == 0x02) | (config[GYRO_RES] == 0x03) | (config[GYRO_RES] == 0x04) ))
-	config[GYRO_RES] = 0x10;
-  if( !((config[ACC_RES] == 0x0C) | (config[ACC_RES] == 0x08) | (config[ACC_RES] == 0x05) | (config[ACC_RES] == 0x03)) )
-	config[ACC_RES] = 0x03;
-  if( !((config[MAG_RES] == 0x00) | (config[MAG_RES] == 0x01) | (config[MAG_RES] == 0x02) | (config[MAG_RES] == 0x03)) )
-	config[MAG_RES] = 0x00;
-  ErasePage(flash_save);
-  WriteWord(flash_save,&config,16);
+  if( sirka_config[SIRKA_ADDRESS] == 0 || sirka_config[SIRKA_ADDRESS] >127)
+	  sirka_config[SIRKA_ADDRESS] = 0x01;
+  if(!( (sirka_config[GYRO_RES] == 0x00) | (sirka_config[GYRO_RES] == 0x01) | (sirka_config[GYRO_RES] == 0x02) | (sirka_config[GYRO_RES] == 0x03) | (sirka_config[GYRO_RES] == 0x04) ))
+	  sirka_config[GYRO_RES] = 0x10;
+  if( !((sirka_config[ACC_RES] == 0x0C) | (sirka_config[ACC_RES] == 0x08) | (sirka_config[ACC_RES] == 0x05) | (sirka_config[ACC_RES] == 0x03)) )
+	  sirka_config[ACC_RES] = 0x03;
+  if( !((sirka_config[MAG_RES] == 0x00) | (sirka_config[MAG_RES] == 0x01) | (sirka_config[MAG_RES] == 0x02) | (sirka_config[MAG_RES] == 0x03)) )
+	  sirka_config[MAG_RES] = 0x00;
+  ErasePage(sirka_save);
+  WriteWord(sirka_save,&sirka_config,8);
 
   /* Init CRC */
   crcInit();
   /* Init SPI, USART, GPIO and Clocks  */
   interface_init();
   /* Setting up BMX055 with default values */
-  setup_Acc(config[ACC_RES]);
-  setup_Gyro(config[GYRO_RES]);
-  setup_Mag(config[MAG_RES]);
-  setup_Gyro_Range(config[GYRO_RES]);
+  setup_Acc(sirka_config[ACC_RES]);
+  setup_Gyro(sirka_config[GYRO_RES]);
+  setup_Mag(sirka_config[MAG_RES]);
+  setup_Gyro_Range(sirka_config[GYRO_RES]);
   /* Configure Interrupt handling */
   enable_interrupts();
   /* Configure Timer for Timeout */
@@ -147,7 +146,7 @@ int main(void)
 			  /*
 			   * Check for address
 			   */
-			  if(received_frame[ADDRESS] == config[SIRKA_ADDRESS])
+			  if(received_frame[ADDRESS] == sirka_config[SIRKA_ADDRESS])
 			  {	/*
 				 * select received_frame
 				 */
@@ -208,34 +207,34 @@ int main(void)
 						 *  Set Gyrometer Range +-2000°/s down to +-125°/s
 						 */
 						case 0x10:	setup_Gyro_Range(received_frame[PARAMETER]);
-									config[SIRKA_ADDRESS] = *address;
-									config[ACC_RES] = *acc_res;
-									config[GYRO_RES] = received_frame[PARAMETER];
-									config[MAG_RES] = *mag_res;
-									ErasePage(flash_save);
-									WriteWord(flash_save,&config,16);
+									sirka_config[SIRKA_ADDRESS] = *address;
+									sirka_config[ACC_RES] = *acc_res;
+									sirka_config[GYRO_RES] = received_frame[PARAMETER];
+									sirka_config[MAG_RES] = *mag_res;
+									ErasePage(sirka_save);
+									WriteWord(sirka_save,&sirka_config,8);
 									break;
 						/*
 						 *  Set Accelerometer Range 2g up to 16g
 						 */
 						case 0x11:	setup_Acc(received_frame[PARAMETER]);
-									config[SIRKA_ADDRESS] = *address;
-									config[ACC_RES] = received_frame[PARAMETER];
-									config[GYRO_RES] = *gyro_res;
-									config[MAG_RES] = *mag_res;
-									ErasePage(flash_save);
-									WriteWord(flash_save,&config,16);
+									sirka_config[SIRKA_ADDRESS] = *address;
+									sirka_config[ACC_RES] = received_frame[PARAMETER];
+									sirka_config[GYRO_RES] = *gyro_res;
+									sirka_config[MAG_RES] = *mag_res;
+									ErasePage(sirka_save);
+									WriteWord(sirka_save,&sirka_config,8);
 									break;
 						/*
 						 *  Set Magnetometer number of measurements
 						 */
 						case 0x12:	setup_Mag(received_frame[PARAMETER]);
-									config[SIRKA_ADDRESS] = *address;
-									config[ACC_RES] = *acc_res;
-									config[GYRO_RES] = *gyro_res;
-									config[MAG_RES] = received_frame[PARAMETER];
-									ErasePage(flash_save);
-									WriteWord(flash_save,&config,16);
+									sirka_config[SIRKA_ADDRESS] = *address;
+									sirka_config[ACC_RES] = *acc_res;
+									sirka_config[GYRO_RES] = *gyro_res;
+									sirka_config[MAG_RES] = received_frame[PARAMETER];
+									ErasePage(sirka_save);
+									WriteWord(sirka_save,&sirka_config,8);
 									break;
 						/*
 						 *  Change Address of µC
@@ -248,9 +247,9 @@ int main(void)
 						case 0x14:	send_hello();
 									break;
 
-						case 0x15:	config[BOOT_FLAG] = 0x01;
-									ErasePage(flash_save);
-									WriteWord(flash_save,&config,16);
+						case 0x15:	boot_config[BOOT_FLAG] = 0x01;
+									ErasePage(boot_save);
+									WriteWord(boot_save,&boot_config,8);
 									WDOG_Enable(true);
 									break;
 						/*  ########################################
