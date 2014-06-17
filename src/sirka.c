@@ -4,7 +4,7 @@
  * SPI-CLOCK =		10MHz
  * UART = 			3000000 Bd/s
  *
- * ##### SENSORS #####hh
+ * ##### SENSORS #####
  * ACC Range 	: 0,98µg per Bit, Maximum 2g
  * GYRO Range 	: 30,5m°/s per Bit, Maximum 1000°/s
  * MAG Range	: 0,3µT per Bit, Maximum 1300µT for XY, 2500µT for Z
