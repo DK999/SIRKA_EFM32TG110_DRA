@@ -37,7 +37,13 @@ void SPI_Init(void)
 
 void USART_Init(void)
 {
-	COM_USART->CLKDIV = 0x100;
+	/*
+	 * Geschwindigkeiten für USART
+	 * CLKDIV -> 0x100 = 1MBit/s
+	 * CLKDIV -> 0x40 = 1,5MBit/s
+	 * CLKDIV -> 0x0 = 2MBit/s
+	 */
+	COM_USART->CLKDIV = 0x0;
 	COM_USART->CMD = (1 << 11) | (1 << 10) | (1 << 2) | (1 << 0);
 	COM_USART->IFC = 0x1FF9;
 	COM_USART->ROUTE = 0x303;

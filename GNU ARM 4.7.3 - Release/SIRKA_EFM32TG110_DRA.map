@@ -784,23 +784,23 @@ OUTPUT(SIRKA_EFM32TG110_DRA.axf elf32-littlearm)
  .debug_ranges  0x00000350       0x18 ./src/watchdog.o
  .debug_ranges  0x00000368       0x80 ./CMSIS/efm32tg/system_efm32tg.o
 
-.debug_line     0x00000000     0x25bd
+.debug_line     0x00000000     0x25c2
  .debug_line    0x00000000      0x317 ./src/BMX055.o
  .debug_line    0x00000317      0x1de ./src/calc.o
  .debug_line    0x000004f5       0xff ./src/crc.o
  .debug_line    0x000005f4      0x59a ./src/debug.o
  .debug_line    0x00000b8e      0x138 ./src/delay.o
  .debug_line    0x00000cc6      0x148 ./src/emu.o
- .debug_line    0x00000e0e      0x2ed ./src/inits.o
- .debug_line    0x000010fb      0x22c ./src/irq.o
- .debug_line    0x00001327      0x276 ./src/msc.o
- .debug_line    0x0000159d      0x2c3 ./src/sirka.o
- .debug_line    0x00001860      0x2a1 ./src/spi.o
- .debug_line    0x00001b01      0x201 ./src/timer.o
- .debug_line    0x00001d02      0x382 ./src/usart.o
- .debug_line    0x00002084      0x1e3 ./src/watchdog.o
- .debug_line    0x00002267       0x8f ./CMSIS/efm32tg/startup_gcc_efm32tg.o
- .debug_line    0x000022f6      0x2c7 ./CMSIS/efm32tg/system_efm32tg.o
+ .debug_line    0x00000e0e      0x2f0 ./src/inits.o
+ .debug_line    0x000010fe      0x22c ./src/irq.o
+ .debug_line    0x0000132a      0x276 ./src/msc.o
+ .debug_line    0x000015a0      0x2c5 ./src/sirka.o
+ .debug_line    0x00001865      0x2a1 ./src/spi.o
+ .debug_line    0x00001b06      0x201 ./src/timer.o
+ .debug_line    0x00001d07      0x382 ./src/usart.o
+ .debug_line    0x00002089      0x1e3 ./src/watchdog.o
+ .debug_line    0x0000226c       0x8f ./CMSIS/efm32tg/startup_gcc_efm32tg.o
+ .debug_line    0x000022fb      0x2c7 ./CMSIS/efm32tg/system_efm32tg.o
 
 .debug_str      0x00000000      0xecf
  .debug_str     0x00000000      0x290 ./src/BMX055.o
