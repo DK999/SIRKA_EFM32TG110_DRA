@@ -42,9 +42,16 @@ void USART_Init(void)
 	 * CLKDIV -> 0x100 = 1MBit/s
 	 * CLKDIV -> 0x40 = 1,5MBit/s
 	 * CLKDIV -> 0x0 = 2MBit/s
+	 *
+	 * CLKDIV -> 0x100 = 2MBit/s 8x OVS
+	 * CLKDIV -> 0x0 = 4MBit/s 8xOVS
+	 *
+	 * CLKDIV -> 0x300 = 2MBit/s 4xOVS
+	 * CLKDIV -> 0x0 = 8MBit/s	4xOVS
 	 */
-	COM_USART->CLKDIV = 0x0;
-	COM_USART->CMD = (1 << 11) | (1 << 10) | (1 << 2) | (1 << 0);
+	COM_USART->CLKDIV = 0x300;
+	COM_USART->CMD = (1 << 11) | (1 << 10) | (1 << 2) | (1 << 0);	// CSMA | MSBF | CCEN | ASYNC
+	COM_USART->CTRL |= ( 3 << 5 );	// 4xOVS
 	COM_USART->IFC = 0x1FF9;
 	COM_USART->ROUTE = 0x303;
 
