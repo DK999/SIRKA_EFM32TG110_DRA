@@ -27,8 +27,9 @@
 #define ADDRESS 3
 #define COMMAND 4
 #define PARAMETER 5
-#define CRCL 6
-#define CRCH 7
+#define BCID 6
+//#define CRCL 6
+//#define CRCH 7
 
 #define SIRKA_ADDRESS 0
 #define ACC_RES 1
@@ -51,20 +52,21 @@ int16_t accdata[3] = { 0, 0, 0};
 int16_t magdata[4] = { 0, 0, 0, 0};
 uint8_t resolution[2] = { 0, 0};
 uint8_t settings_acc = 0x00;
+uint8_t bcid = 0x00;
 
 volatile uint8_t received_frame[30] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 volatile short frame_position = 0;
 
-uint32_t sirka_save = 0x7800;
-uint32_t boot_save = 0x3800;
-uint8_t *address = (uint8_t*)0x7800;
-uint8_t *acc_res = (uint8_t*)0x7801;
-uint8_t *gyro_res = (uint8_t*)0x7802;
-uint8_t *mag_res = (uint8_t*)0x7803;
-uint16_t *crc_pack = (uint16_t*)0x3800;
-uint32_t *file_size = (uint32_t*)0x3802;
-uint8_t *fw_check = (uint8_t*)0x3806;
-uint8_t *boot_flag = (uint8_t*)0x3807;
+uint32_t sirka_save = 0x7800;					// Declares SIRKA Config at 0x7800
+uint32_t boot_save = 0x3800;					// Declares Bootloader Config at 0x3800
+uint8_t *address = (uint8_t*)0x7800;			// Address Pointer to 0x7800
+uint8_t *acc_res = (uint8_t*)0x7801;			// ACC Pointer to 0x7801
+uint8_t *gyro_res = (uint8_t*)0x7802;			// Gyro Pointer to 0x7802
+uint8_t *mag_res = (uint8_t*)0x7803;			// Mag Pointer to 0x7803
+uint16_t *crc_pack = (uint16_t*)0x3800;			// CRC of App Pointer to 0x3800
+uint32_t *file_size = (uint32_t*)0x3802;		// Filesize of App Pointer to 0x3802
+uint8_t *fw_check = (uint8_t*)0x3806;			// APP_OK Pointer to 0x3806
+uint8_t *boot_flag = (uint8_t*)0x3807;			// Bootflag Pointer to 0x3807
 uint8_t sirka_config[8] = { 0,0,0,0,0,0,0,0 };
 uint8_t boot_config[8] = { 0,0,0,0,0,0,0,0 };
 
@@ -75,23 +77,23 @@ uint8_t boot_config[8] = { 0,0,0,0,0,0,0,0 };
 int main(void)
 { volatile uint16_t crc = 0x0000;					// Init CRC-Value
   volatile uint16_t crc_ex = 0x0000;
-  sirka_config[SIRKA_ADDRESS] = *address;
-  sirka_config[ACC_RES] = *acc_res;
-  sirka_config[GYRO_RES] = *gyro_res;
-  sirka_config[MAG_RES] = *mag_res;
-  boot_config[CRC_PACK] = (uint8_t)*crc_pack;
+  sirka_config[SIRKA_ADDRESS] = *address;			// Reads SIRKA Address from Flash
+  sirka_config[ACC_RES] = *acc_res;					// Reads ACC Resolution from Flash
+  sirka_config[GYRO_RES] = *gyro_res;				// Reads Gyro Resolution from Flash
+  sirka_config[MAG_RES] = *mag_res;					// Reads Mag Resolution from Flash
+  boot_config[CRC_PACK] = (uint8_t)*crc_pack;		// Reads CRC of App from Flash
   boot_config[CRC_PACK+1] = (uint8_t)(*crc_pack>>8);
-  boot_config[FILE_SIZE] = (uint8_t)*file_size;
+  boot_config[FILE_SIZE] = (uint8_t)*file_size;		// Reads Filesize of App from Flash
   boot_config[FILE_SIZE+1] = (uint8_t)(*file_size>>8);
   boot_config[FILE_SIZE+2] = (uint8_t)(*file_size>>16);
   boot_config[FILE_SIZE+3] = (uint8_t)(*file_size>>24);
-  boot_config[FW_CHECK]= *fw_check;
-  boot_config[BOOT_FLAG]= 0x00;
+  boot_config[FW_CHECK]= *fw_check;					// Reads APP_OK Flag from Flash
+  boot_config[BOOT_FLAG]= 0x00;						// Sets Bootloader Flag to 0
 
   /* Chip errata */
   CHIP_Init();
 
-  /* Read Config from Flash */
+  /* Check for unallowed configs */
   if( sirka_config[SIRKA_ADDRESS] == 0 || sirka_config[SIRKA_ADDRESS] >127)
 	  sirka_config[SIRKA_ADDRESS] = 0x01;
   if(!( (sirka_config[GYRO_RES] == 0x00) | (sirka_config[GYRO_RES] == 0x01) | (sirka_config[GYRO_RES] == 0x02) | (sirka_config[GYRO_RES] == 0x03) | (sirka_config[GYRO_RES] == 0x04) ))
@@ -100,6 +102,7 @@ int main(void)
 	  sirka_config[ACC_RES] = 0x03;
   if( !((sirka_config[MAG_RES] == 0x00) | (sirka_config[MAG_RES] == 0x01) | (sirka_config[MAG_RES] == 0x02) | (sirka_config[MAG_RES] == 0x03)) )
 	  sirka_config[MAG_RES] = 0x00;
+  /* Erase and save config */
   ErasePage(sirka_save);
   WriteWord(sirka_save,&sirka_config,8);
 
@@ -133,6 +136,9 @@ int main(void)
 //  		  {
 //  			  crc = CRC16(crc,received_frame[i]);
 //  		  }
+//  		  crc_ex = (uint16_t)received_frame[received_frame[LENGTH]-1];               // Store CRC-m_checksum
+//  		  crc_ex <<= 8;
+//  		  crc_ex |= received_frame[received_frame[LENGTH]-2];
 //  		  crc_ex = (uint16_t)received_frame[CRCH];               // Store CRC-m_checksum
 //  		  crc_ex <<= 8;
 //  		  crc_ex |= received_frame[CRCL];
@@ -148,7 +154,7 @@ int main(void)
 			   */
 			  if(received_frame[ADDRESS] == sirka_config[SIRKA_ADDRESS])
 			  {	/*
-				 * select received_frame
+				 * select command
 				 */
 				switch(received_frame[COMMAND])
 				  {		/*
@@ -246,12 +252,21 @@ int main(void)
 						 */
 						case 0x14:	send_hello();
 									break;
-
+						/*
+						 * Reboots Device, sets Bootloader-Flag
+						 */
 						case 0x15:	boot_config[BOOT_FLAG] = 0x01;
 									ErasePage(boot_save);
 									WriteWord(boot_save,&boot_config,8);
 									WDOG_Enable(true);
 									break;
+						/*
+						 * Sends all Data got from last Broadcast command, resets BroadcastID
+						 */
+						case 0x16:	send_data_all_bcid(gyrodata,accdata,magdata,bcid);
+									bcid = 0;
+									break;
+
 						/*  ########################################
 						 *  ########## 	DEBUG FUNCTIONS! ###########
 						 *  ########################################
@@ -299,6 +314,21 @@ int main(void)
 					  } // End SWITCH
 
 				  } // End Address-Check
+			  else if(received_frame[ADDRESS] == 128)	// if BROADCAST
+			  {
+				  switch(received_frame[COMMAND])
+				  {		/*
+						 *	Get all data from sensors, parameter defines number of Measurements ( maximum of 32 ), just stores data and BCID
+						 */
+				  	  	  case 0x00:
+									getGyrData(gyrodata,received_frame[PARAMETER]);
+									getAccData(accdata,received_frame[PARAMETER]);
+									getMagData_forced(magdata);
+									bcid = received_frame[BCID];
+
+									break;
+				  }
+			  }
 			  } // End Preamble-Check
   		  } // End CRC
 	  } // End While(1)

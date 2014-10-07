@@ -1,10 +1,10 @@
-/* Linker script for Energy Micro EFM32TG devices */
+/* Linker script for Silicon Labs EFM32TG devices */
 /*                                                                  */
 /* This file is subject to the license terms as defined in ARM's    */
 /* CMSIS END USER LICENSE AGREEMENT.pdf, governing the use of       */
 /* Example Code.                                                    */
 /*                                                                  */
-/* Energy Micro AS, 2012                                            */
+/* Silicon Laboratories, Inc. 2014                                  */
 MEMORY
 {
   FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 32768

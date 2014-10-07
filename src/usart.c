@@ -77,32 +77,79 @@ void send_data_all(int16_t Gyr[], int16_t Acc[], int16_t Mag[])
 	uint8_t counter = 4;
 	volatile uint16_t crc = 0x0000;
 
-	byte[0]= 0xAA;
+	byte[0]= 0xAA;									// Add PREAMBLE, LENGTH and HOST ADDRESS
 	byte[1]= 0xAA;
 	byte[2]= 0x18;
 	byte[3]= 0x00;
 
-	for ( int i = 0; i < 3 ; i++)
+	for ( int i = 0; i < 3 ; i++)					// Add X,Y,Z of Gyro (LSB First)
 	{
 		byte[counter] = (uint8_t) Gyr[i];
 		byte[counter+1] = (uint8_t) (Gyr[i] >> 8);
 		counter+=2;
 	}
-	for ( int i = 0; i < 3 ; i++)
+	for ( int i = 0; i < 3 ; i++)					// Add X,Y,Z of Acc (LSB First)
 	{
 		byte[counter] = (uint8_t) Acc[i];
 		byte[counter+1] = (uint8_t) (Acc[i] >> 8);
 		counter+=2;
 	}
-	for ( int i = 0; i < 3 ; i++)
+	for ( int i = 0; i < 3 ; i++)					// Add X,Y,Z of Magnet (LSB First)
 	{
 		byte[counter] = (uint8_t) Mag[i];
 		byte[counter+1] = (uint8_t) (Mag[i] >> 8);
 		counter+=2;
 	}
-	GPIO->P[USART_CS_PORT].DOUTSET = (1 << USART_CS_PIN);
+	GPIO->P[USART_CS_PORT].DOUTSET = (1 << USART_CS_PIN);	// Set RS485 for Write
 
 	for ( int i = 0; i < 22 ; i++)
+	{
+		crc = CRC16(crc,byte[i]);				// create CRC
+		print_byte(byte[i]);					// Send bytes
+	}
+	byte[0] = (uint8_t)crc;						// split CRC in two bytes
+	byte[1] = (uint8_t)(crc >> 8 );
+
+	print_byte(byte[0]);						// send CRC LSB
+	print_byte(byte[1]);						// send CRC MSB
+
+	GPIO->P[USART_CS_PORT].DOUTCLR = (1 << USART_CS_PIN);					// Clear RS485 for Read
+
+}
+
+void send_data_all_bcid(int16_t Gyr[], int16_t Acc[], int16_t Mag[], int8_t bcid)
+{	uint8_t byte[23];
+	uint8_t counter = 4;
+	volatile uint16_t crc = 0x0000;
+
+	byte[0]= 0xAA;		// Add PREAMBLE, LENGTH and HOST ADDRESS
+	byte[1]= 0xAA;
+	byte[2]= 0x19;
+	byte[3]= 0x00;
+
+	for ( int i = 0; i < 3 ; i++)				// Add X,Y,Z of Gyro (LSB First)
+	{
+		byte[counter] = (uint8_t) Gyr[i];
+		byte[counter+1] = (uint8_t) (Gyr[i] >> 8);
+		counter+=2;
+	}
+	for ( int i = 0; i < 3 ; i++)				// Add X,Y,Z of Acc (LSB First)
+	{
+		byte[counter] = (uint8_t) Acc[i];
+		byte[counter+1] = (uint8_t) (Acc[i] >> 8);
+		counter+=2;
+	}
+	for ( int i = 0; i < 3 ; i++)				// Add X,Y,Z of Magnet (LSB First)
+	{
+		byte[counter] = (uint8_t) Mag[i];
+		byte[counter+1] = (uint8_t) (Mag[i] >> 8);
+		counter+=2;
+	}
+	byte[22]=bcid;								// Add BroadcastID
+
+	GPIO->P[USART_CS_PORT].DOUTSET = (1 << USART_CS_PIN);	// Set RS485 for Write
+
+	for ( int i = 0; i < 23 ; i++)
 	{
 		crc = CRC16(crc,byte[i]);				// create CRC
 		print_byte(byte[i]);					// Send bytes

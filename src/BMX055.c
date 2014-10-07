@@ -306,12 +306,12 @@ void setup_Gyro_Range(uint8_t range){
 
 void setup_Address(uint8_t address)
 {
-	sirka_config[SIRKA_ADDRESS] = address;
-	sirka_config[ACC_RES] = *acc_res;
-	sirka_config[GYRO_RES] = *gyro_res;
-	sirka_config[MAG_RES] = *mag_res;
-	ErasePage(sirka_save);
-	WriteWord(sirka_save,&sirka_config,8);
+	sirka_config[SIRKA_ADDRESS] = address;	// New Address
+	sirka_config[ACC_RES] = *acc_res;		// Saves ACC Resolution
+	sirka_config[GYRO_RES] = *gyro_res;		// Saves Gyro Resolution
+	sirka_config[MAG_RES] = *mag_res;		// Saves Magnet Resolution
+	ErasePage(sirka_save);					// Deletes Page at 0x7800
+	WriteWord(sirka_save,&sirka_config,8);	// writes SIRKA Config at 0x7800
 }
 
 
