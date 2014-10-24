@@ -19,6 +19,7 @@ void USART_Init(void);
 void Clocks_Init(void);
 void Timer_Init(void);
 void GPIO_Init(void);
-void WD_Init();
+void WD_Init(void);
+void RTC_Init(void);
 
 #endif /* INITS_H_ */

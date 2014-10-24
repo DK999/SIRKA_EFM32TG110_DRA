@@ -47,6 +47,7 @@ enum sensors
 	Magnetometer,
 	Temperature
 };
+uint32_t systime = 0;
 int16_t gyrodata[3] = { 0, 0, 0};
 int16_t accdata[3] = { 0, 0, 0};
 int16_t magdata[4] = { 0, 0, 0, 0};
@@ -120,6 +121,9 @@ int main(void)
   /* Configure Timer for Timeout */
   Timer_Init();
 
+  WD_Init();
+
+  RTC_Init();
 
   while(1)
 	  {

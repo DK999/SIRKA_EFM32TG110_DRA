@@ -11,12 +11,20 @@
 
 extern uint8_t received_frame[30];
 extern short frame_position;
+extern uint32_t systime;
+
 void enable_interrupts(void)
 {
 	/* Enable interrupt for USART0 */
 	NVIC_ClearPendingIRQ(USART0_RX_IRQn);
 	NVIC_EnableIRQ(USART0_RX_IRQn);
 	USART0->IEN |= USART_IEN_RXDATAV;
+	/* Enable interrupt for TIMER0 */
+	TIMER0->IEN = 0x1;
+	NVIC_EnableIRQ(TIMER0_IRQn);              // Enable TIMER0 interrupt vector in NVIC
+	/* Enable interrupt for RTC */
+	RTC->IEN = 0x2;		// Enable Interrupt on Comp0
+	NVIC_EnableIRQ(RTC_IRQn);				// Enable RTC interrupt vector in NVIC
 }
 /* saves received byte in 'received_frame'
  * increments frame_position after each byte
@@ -40,4 +48,12 @@ TIMER_intclear();      			// Clear overflow flag
 TIMER_stop();					// disable timer
 frame_position = 0;				// error while getting frame, reset frame position to zero
 received_frame[2] = 10;			// give PACKET-LENGTH a fixed value
+}
+
+
+void RTC_IRQHandler(void)
+{
+  /* Clear interrupt source */
+	RTC->IFC = 0x2;
+	systime++;
 }
