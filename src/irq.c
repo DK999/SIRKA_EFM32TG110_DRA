@@ -22,9 +22,10 @@ void enable_interrupts(void)
 	/* Enable interrupt for TIMER0 */
 	TIMER0->IEN = 0x1;
 	NVIC_EnableIRQ(TIMER0_IRQn);              // Enable TIMER0 interrupt vector in NVIC
-	/* Enable interrupt for RTC */
-	RTC->IEN = 0x2;		// Enable Interrupt on Comp0
-	NVIC_EnableIRQ(RTC_IRQn);				// Enable RTC interrupt vector in NVIC
+	/* Enable interrupt for TIMER1 */
+	TIMER1->IEN = 0x1;
+	NVIC_EnableIRQ(TIMER1_IRQn);              // Enable TIMER0 interrupt vector in NVIC
+
 }
 /* saves received byte in 'received_frame'
  * increments frame_position after each byte
@@ -33,27 +34,26 @@ void enable_interrupts(void)
 void USART0_RX_IRQHandler(void)
 {
 	if(frame_position == 0)			// Start Timer when receiving first IRQ
-			TIMER_start();
+			TIMER0_start();
 	received_frame[frame_position++] = USART0->RXDATA;
 	if(frame_position == received_frame[2])				// if full frame received deactivate timer
 	{
-		TIMER_stop();
+		TIMER0_stop();
 	}
 }
 
 /* occurs if data stream isn't fully received by USART0 */
 void TIMER0_IRQHandler(void)
 {
-TIMER_intclear();      			// Clear overflow flag
-TIMER_stop();					// disable timer
+TIMER0_intclear();      			// Clear overflow flag
+TIMER0_stop();					// disable timer
 frame_position = 0;				// error while getting frame, reset frame position to zero
 received_frame[2] = 10;			// give PACKET-LENGTH a fixed value
 }
 
-
-void RTC_IRQHandler(void)
+void TIMER1_IRQHandler(void)
 {
-  /* Clear interrupt source */
-	RTC->IFC = 0x2;
-	systime++;
+TIMER1_intclear();      			// Clear overflow flag
+systime+=5;							// Add 5µs to Systime
 }
+

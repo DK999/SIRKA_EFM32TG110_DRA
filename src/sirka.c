@@ -123,7 +123,9 @@ int main(void)
 
   WD_Init();
 
-  RTC_Init();
+  TIMER1_start();
+
+//  RTC_Init();
 
   while(1)
 	  {
@@ -149,6 +151,7 @@ int main(void)
   		  /*
   		   * Check if Preamble OK and frame fully received
   		   */
+
   		  if(true)
   		  {
 		  if((received_frame[PREAMBLE_ONE] == 0xAA) && (received_frame[PREAMBLE_TWO] == 0xAA))

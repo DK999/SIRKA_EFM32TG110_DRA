@@ -10,7 +10,10 @@
 
 #include "efm32tg110f32.h"
 
-void TIMER_start(void);
-void TIMER_stop(void);
-void TIMER_intclear(void);
+void TIMER0_start(void);
+void TIMER0_stop(void);
+void TIMER0_intclear(void);
+void TIMER1_start(void);
+void TIMER1_stop(void);
+void TIMER1_intclear(void);
 #endif /* TIMER_H_ */

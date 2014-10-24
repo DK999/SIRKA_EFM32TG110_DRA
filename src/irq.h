@@ -17,6 +17,6 @@
 void enable_interrupts(void);
 void USART0_RX_IRQHandler(void);
 void TIMER0_IRQHandler(void);
-void RTC_IRQHandler(void);
+void TIMER1_IRQHandler(void);
 
 #endif /* IRQ_H_ */

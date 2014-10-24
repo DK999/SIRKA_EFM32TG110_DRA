@@ -23,10 +23,6 @@
 #define USART_RX 12
 #define USART_CS 14
 
-#define LFRCO_FREQUENCY              32768
-#define WAKEUP_INTERVAL_MS            1
-#define RTC_COUNT_BETWEEN_WAKEUP    (((LFRCO_FREQUENCY * WAKEUP_INTERVAL_MS) / 1000)-1)
-
 void SPI_Init(void)
 {	USART1->CTRL = 0x401;
 	USART1->FRAME = 0x1005;
@@ -79,18 +75,12 @@ void GPIO_Init(void)
 void Timer_Init(void)
 {
 	TIMER0->CTRL = 0x40;
-	TIMER0->TOP = 0x1900;
-//	TIMER0->IEN = 0x1;
-//	NVIC_EnableIRQ(TIMER0_IRQn);              // Enable TIMER0 interrupt vector in NVIC
+	TIMER0->TOP = 0x3C0;		// 30µs
+
+	TIMER1->CTRL = 0x40;
+	TIMER1->TOP = 0xA0;		// Set Top to 160 for 5µs interrupt
 }
 
-void RTC_Init(void)
-{
-	RTC->CTRL = 0x5;	// Enable RTC and set Compare to Channel 0
-	RTC->COMP0 = RTC_COUNT_BETWEEN_WAKEUP;	// Set TopValue for RTC Interrupt
-//	RTC->IEN = 0x2;		// Enable Interrupt on Comp0
-//	NVIC_EnableIRQ(RTC_IRQn);
-}
 
 void WD_Init()
 {
@@ -101,7 +91,7 @@ void WD_Init()
 
 void Clocks_Init(void)
 {	  CMU->CTRL = 0xC062C;            // Set HF clock divider to 0 to keep core frequency 32MHz
-	  CMU->OSCENCMD |= 0x4;           // Enable XTAL Oscillator
+	  CMU->OSCENCMD |= 0x4;           // Enable HFXO Oscillator
 	  while(! (CMU->STATUS & 0x8) );  // Wait for XTAL osc to stabilize
 	  CMU->HFPERCLKDIV = 0x100;		  // Enable HF Peripheral Clock 32MHz without Divider
 	  CMU->HFRCOCTRL = 0x3AE;
@@ -110,7 +100,7 @@ void Clocks_Init(void)
 	  CMU->LFCLKSEL = 0x5;			  // Enable ULFRCO for LFBE and LFAE
 	  CMU->CMD = 0x2;                 // Select HF XTAL osc as system clock source. 32MHz XTAL
 	  CMU->HFCORECLKEN0 = 0x4;
-	  CMU->HFPERCLKEN0 = 0x5C; 		// Enable GPIO, USART0, and USART1 peripheral clocks
+	  CMU->HFPERCLKEN0 = 0x7C; 		// Enable GPIO, Timer0, Timer1, USART0, and USART1 peripheral clocks
 	  CMU->LFACLKEN0 = 0x2;			// Enable RTC Clock
 	  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;		// Set CoreDebug n CMSIS
 	  DWT->CTRL |= 1;										// Activate DWT								// Activate DWT
