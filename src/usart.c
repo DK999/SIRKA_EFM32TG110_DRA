@@ -21,7 +21,10 @@ void print_byte(uint8_t byte) {
   COM_USART->TXDATA = byte;                 // send byte over UART
   while (!(COM_USART->STATUS & USART_STATUS_TXC)) ; // Waiting for transmission of last byte
 }
-
+/*
+ * Sends Data depending on type
+ * Sends HALL value from magnet
+ */
 void send_data(int16_t Data[],uint8_t type)
 {	uint8_t byte[13];
 	uint8_t counter = 4;
@@ -74,7 +77,13 @@ void send_data(int16_t Data[],uint8_t type)
 	}
 	GPIO->P[USART_CS_PORT].DOUTCLR = (1 << USART_CS_PIN);					// Clear RS485 for Read
 }
-
+/*
+ * Sends all data at once
+ * @Gyr : 16Bit Gyro Data Array
+ * @Acc : 16Bit Acc Data Array
+ * @Mag : 16Bit Mag Data Array
+ * @broadcast : 8Bit boolean if broadcast answer or single
+ */
 void send_data_all(int16_t Gyr[], int16_t Acc[], int16_t Mag[],uint8_t broadcast)
 {	uint8_t byte[28];
 	uint8_t counter = 4;
@@ -137,7 +146,9 @@ void send_data_all(int16_t Gyr[], int16_t Acc[], int16_t Mag[],uint8_t broadcast
 	GPIO->P[USART_CS_PORT].DOUTCLR = (1 << USART_CS_PIN);					// Clear RS485 for Read
 
 }
-
+/*
+ * Sends config of gyro and acc
+ */
 void send_resolution(uint8_t Config[])
 {	volatile uint16_t crc = 0x0000;
 	uint8_t byte[6];

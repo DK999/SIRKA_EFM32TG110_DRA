@@ -31,7 +31,7 @@ all: SIRKA_EFM32TG110_DRA.axf
 SIRKA_EFM32TG110_DRA.axf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GNU ARM C Linker'
-	arm-none-eabi-gcc -g -gdwarf-2 -mcpu=cortex-m3 -mthumb  --specs=nano.specs -Xlinker --gc-sections -Xlinker -Map="SIRKA_EFM32TG110_DRA.map" -T "SIRKA_EFM32TG110_DRA.ld" -o SIRKA_EFM32TG110_DRA.axf "./src/BMX055.o" "./src/calc.o" "./src/crc.o" "./src/debug.o" "./src/delay.o" "./src/emu.o" "./src/inits.o" "./src/irq.o" "./src/msc.o" "./src/sirka.o" "./src/spi.o" "./src/timer.o" "./src/usart.o" "./src/watchdog.o" "./emlib/em_gpio.o" "./emlib/em_system.o" "./CMSIS/efm32tg/startup_gcc_efm32tg.o" "./CMSIS/efm32tg/system_efm32tg.o" -Wl,--start-group -lgcc -lc -lnosys -Wl,--end-group
+	arm-none-eabi-gcc -g -gdwarf-2 -mcpu=cortex-m3 -mthumb  --specs=nano.specs -Xlinker --gc-sections -Xlinker -Map="SIRKA_EFM32TG110_DRA.map" -T "C:\Users\Diablokiller999\git\SIRKA_EFM32TG110_DRA\GNU ARM 4.7.3 - Release\SIRKA_EFM32TG110_DRA - 16KB.ld" -o SIRKA_EFM32TG110_DRA.axf "./src/BMX055.o" "./src/calc.o" "./src/crc.o" "./src/debug.o" "./src/delay.o" "./src/emu.o" "./src/inits.o" "./src/irq.o" "./src/msc.o" "./src/sirka.o" "./src/spi.o" "./src/timer.o" "./src/usart.o" "./src/watchdog.o" "./emlib/em_gpio.o" "./emlib/em_system.o" "./CMSIS/efm32tg/startup_gcc_efm32tg.o" "./CMSIS/efm32tg/system_efm32tg.o" -Wl,--start-group -lgcc -lc -lnosys -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build

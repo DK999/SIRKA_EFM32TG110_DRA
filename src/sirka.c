@@ -116,7 +116,7 @@ int main(void)
 	  	  sirka_config[MAG_RES] = 0x00;
 	  	  changed = 1;
 	  }
-  /* Erase and save config */
+  /* Erase and save config if not correct */
   if(changed == 1)
   {
 	  ErasePage(sirka_save);
@@ -352,29 +352,34 @@ int main(void)
 				  	  	  case 0x01:
 				  	  		  	  	systime = 0;
 				  	  		  	  	break;
-
+				  	  	/*
+				  	  	 * Send data all chain
+				  	  	 */
 				  	  	  case 0x02:
-				  	  		  	  	if ( sirka_config[SIRKA_ADDRESS] == 0x03 )
+				  	  		  	  	if ( sirka_config[SIRKA_ADDRESS] == 0x01 )
 				  	  		  	  	{
-				  	  		  	  		send_data_all(gyrodata,accdata,magdata,true);
+				  	  		  	  		send_data_all(gyrodata,accdata,magdata,true);									// sends data immediately if units address is 01
 				  	  		  	  	}
 				  	  		  	  	else
 				  	  		  	  	{
-//				  	  		  	  		int systime_old = systime;
-				  	  		  	  		volatile uint32_t timeout=1;
+				  	  		  	  		volatile uint32_t timeout=1;		// creating non-zero timeout variable, maximum of 65 units!
 				  	  		  	  		received_frame[23] = 40;
-
+				  	  		  	  		/*
+				  	  		  	  		 * Receives Package, checks if package is from Address-1
+				  	  		  	  		 * If no package is received, a timeout starts transmission anyway
+				  	  		  	  		 * timeout multiplied by own address to prevent bus conflicts if timeout happened
+				  	  		  	  		 */
 				  	  		  	  		while( received_frame[23] != (sirka_config[SIRKA_ADDRESS]-1) && (timeout > 0) )
 				  	  		  	  		{
-				  	  		  	  			timeout = 100*sirka_config[SIRKA_ADDRESS];
-				  	  		  	  			frame_position = 0;					// points to last received frame byte
-											received_frame[LENGTH] = 30;
-											while( frame_position !=  received_frame[LENGTH] && (timeout > 0))			// stay in sleep mode while not received frame length and address
+				  	  		  	  			timeout = 1000*sirka_config[SIRKA_ADDRESS];									// resets timeout after each received package
+				  	  		  	  			frame_position = 0;															// points to last received frame byte
+											received_frame[LENGTH] = 30;												// set length of received frame to value > 3
+											while( frame_position !=  received_frame[LENGTH] && (timeout > 0))			// stay in loop while not received frame length and address or timeout
 											{
 												--timeout;
 											}
 				  	  		  	  		}
-				  	  		  	  			send_data_all(gyrodata,accdata,magdata,true);
+				  	  		  	  			send_data_all(gyrodata,accdata,magdata,true);								// sends data
 				  	  		  	  	}
 				  	  		  	  	break;
 
