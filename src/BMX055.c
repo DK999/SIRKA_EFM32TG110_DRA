@@ -23,7 +23,7 @@
 #define MAG_RES 3
 
 // GLOBAL VARIABLES
-extern uint32_t sirka_save;
+extern uint16_t sirka_save;
 uint8_t XY = 0x01 ,Z = 0x02;
 extern uint8_t *acc_res;
 extern uint8_t *gyro_res;
@@ -307,9 +307,9 @@ void setup_Gyro_Range(uint8_t range){
 void setup_Address(uint8_t address)
 {
 	sirka_config[SIRKA_ADDRESS] = address;	// New Address
-	sirka_config[ACC_RES] = *acc_res;		// Saves ACC Resolution
-	sirka_config[GYRO_RES] = *gyro_res;		// Saves Gyro Resolution
-	sirka_config[MAG_RES] = *mag_res;		// Saves Magnet Resolution
+//	sirka_config[ACC_RES] = *acc_res;		// Saves ACC Resolution
+//	sirka_config[GYRO_RES] = *gyro_res;		// Saves Gyro Resolution
+//	sirka_config[MAG_RES] = *mag_res;		// Saves Magnet Resolution
 	ErasePage(sirka_save);					// Deletes Page at 0x7800
 	WriteWord(sirka_save,&sirka_config,8);	// writes SIRKA Config at 0x7800
 }

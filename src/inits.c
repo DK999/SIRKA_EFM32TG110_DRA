@@ -75,7 +75,7 @@ void GPIO_Init(void)
 void Timer_Init(void)
 {
 	TIMER0->CTRL = 0x40;
-	TIMER0->TOP = 0x3C0;		// 30µs
+	TIMER0->TOP = 0x140;		// 10µs
 
 	TIMER1->CTRL = 0x40;
 	TIMER1->TOP = 0xA0;		// Set Top to 160 for 5µs interrupt

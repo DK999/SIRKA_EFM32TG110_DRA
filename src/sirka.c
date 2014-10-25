@@ -47,7 +47,7 @@ enum sensors
 	Magnetometer,
 	Temperature
 };
-uint32_t systime = 0;
+volatile uint32_t systime = 0;
 int16_t gyrodata[3] = { 0, 0, 0};
 int16_t accdata[3] = { 0, 0, 0};
 int16_t magdata[4] = { 0, 0, 0, 0};
@@ -55,11 +55,11 @@ uint8_t resolution[2] = { 0, 0};
 uint8_t settings_acc = 0x00;
 uint8_t bcid = 0x00;
 
-volatile uint8_t received_frame[30] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+volatile uint8_t received_frame[30] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0};
 volatile short frame_position = 0;
 
-uint32_t sirka_save = 0x7800;					// Declares SIRKA Config at 0x7800
-uint32_t boot_save = 0x3800;					// Declares Bootloader Config at 0x3800
+uint16_t sirka_save = 0x7800;					// Declares SIRKA Config at 0x7800
+uint16_t boot_save = 0x3800;					// Declares Bootloader Config at 0x3800
 uint8_t *address = (uint8_t*)0x7800;			// Address Pointer to 0x7800
 uint8_t *acc_res = (uint8_t*)0x7801;			// ACC Pointer to 0x7801
 uint8_t *gyro_res = (uint8_t*)0x7802;			// Gyro Pointer to 0x7802
@@ -78,6 +78,7 @@ uint8_t boot_config[8] = { 0,0,0,0,0,0,0,0 };
 int main(void)
 { volatile uint16_t crc = 0x0000;					// Init CRC-Value
   volatile uint16_t crc_ex = 0x0000;
+  uint8_t changed = 0;
   sirka_config[SIRKA_ADDRESS] = *address;			// Reads SIRKA Address from Flash
   sirka_config[ACC_RES] = *acc_res;					// Reads ACC Resolution from Flash
   sirka_config[GYRO_RES] = *gyro_res;				// Reads Gyro Resolution from Flash
@@ -96,16 +97,32 @@ int main(void)
 
   /* Check for unallowed configs */
   if( sirka_config[SIRKA_ADDRESS] == 0 || sirka_config[SIRKA_ADDRESS] >127)
-	  sirka_config[SIRKA_ADDRESS] = 0x01;
-  if(!( (sirka_config[GYRO_RES] == 0x00) | (sirka_config[GYRO_RES] == 0x01) | (sirka_config[GYRO_RES] == 0x02) | (sirka_config[GYRO_RES] == 0x03) | (sirka_config[GYRO_RES] == 0x04) ))
-	  sirka_config[GYRO_RES] = 0x10;
-  if( !((sirka_config[ACC_RES] == 0x0C) | (sirka_config[ACC_RES] == 0x08) | (sirka_config[ACC_RES] == 0x05) | (sirka_config[ACC_RES] == 0x03)) )
-	  sirka_config[ACC_RES] = 0x03;
-  if( !((sirka_config[MAG_RES] == 0x00) | (sirka_config[MAG_RES] == 0x01) | (sirka_config[MAG_RES] == 0x02) | (sirka_config[MAG_RES] == 0x03)) )
-	  sirka_config[MAG_RES] = 0x00;
+	  {
+	  	  sirka_config[SIRKA_ADDRESS] = 0x01;
+	  	  changed = 1;
+	  }
+  if(!( (sirka_config[GYRO_RES] == 0x00) || (sirka_config[GYRO_RES] == 0x01) || (sirka_config[GYRO_RES] == 0x02) || (sirka_config[GYRO_RES] == 0x03) || (sirka_config[GYRO_RES] == 0x04) ))
+	  {
+	  	  sirka_config[GYRO_RES] = 0x10;
+	  	  changed = 1;
+	  }
+  if( !((sirka_config[ACC_RES] == 0x0C) || (sirka_config[ACC_RES] == 0x08) || (sirka_config[ACC_RES] == 0x05) || (sirka_config[ACC_RES] == 0x03)) )
+	  {
+	  	  sirka_config[ACC_RES] = 0x03;
+	  	  changed = 1;
+	  }
+  if( !((sirka_config[MAG_RES] == 0x00) || (sirka_config[MAG_RES] == 0x01) || (sirka_config[MAG_RES] == 0x02) || (sirka_config[MAG_RES] == 0x03)) )
+	  {
+	  	  sirka_config[MAG_RES] = 0x00;
+	  	  changed = 1;
+	  }
   /* Erase and save config */
-  ErasePage(sirka_save);
-  WriteWord(sirka_save,&sirka_config,8);
+  if(changed == 1)
+  {
+	  ErasePage(sirka_save);
+	  WriteWord(sirka_save,&sirka_config,8);
+  }
+
 
   /* Init CRC */
   crcInit();
@@ -125,14 +142,10 @@ int main(void)
 
   TIMER1_start();
 
-//  RTC_Init();
-
   while(1)
 	  {
-
-
 		  frame_position = 0;					// points to last received frame byte
-		  received_frame[LENGTH] = 10;
+		  received_frame[LENGTH] = 30;
 		  while( frame_position !=  received_frame[LENGTH] )			// stay in sleep mode while not received frame length and address
 		  {
 			  EMU_EnterEM1();
@@ -172,7 +185,7 @@ int main(void)
 									getAccData(accdata,received_frame[PARAMETER]);
 									getMagData_forced(magdata);
 
-									send_data_all(gyrodata,accdata,magdata);
+									send_data_all(gyrodata,accdata,magdata,false);
 
 									break;
 						/*
@@ -220,10 +233,10 @@ int main(void)
 						 *  Set Gyrometer Range +-2000°/s down to +-125°/s
 						 */
 						case 0x10:	setup_Gyro_Range(received_frame[PARAMETER]);
-									sirka_config[SIRKA_ADDRESS] = *address;
-									sirka_config[ACC_RES] = *acc_res;
+//									sirka_config[SIRKA_ADDRESS] = *address;
+//									sirka_config[ACC_RES] = *acc_res;
 									sirka_config[GYRO_RES] = received_frame[PARAMETER];
-									sirka_config[MAG_RES] = *mag_res;
+//									sirka_config[MAG_RES] = *mag_res;
 									ErasePage(sirka_save);
 									WriteWord(sirka_save,&sirka_config,8);
 									break;
@@ -231,10 +244,10 @@ int main(void)
 						 *  Set Accelerometer Range 2g up to 16g
 						 */
 						case 0x11:	setup_Acc(received_frame[PARAMETER]);
-									sirka_config[SIRKA_ADDRESS] = *address;
+//									sirka_config[SIRKA_ADDRESS] = *address;
 									sirka_config[ACC_RES] = received_frame[PARAMETER];
-									sirka_config[GYRO_RES] = *gyro_res;
-									sirka_config[MAG_RES] = *mag_res;
+//									sirka_config[GYRO_RES] = *gyro_res;
+//									sirka_config[MAG_RES] = *mag_res;
 									ErasePage(sirka_save);
 									WriteWord(sirka_save,&sirka_config,8);
 									break;
@@ -242,9 +255,9 @@ int main(void)
 						 *  Set Magnetometer number of measurements
 						 */
 						case 0x12:	setup_Mag(received_frame[PARAMETER]);
-									sirka_config[SIRKA_ADDRESS] = *address;
-									sirka_config[ACC_RES] = *acc_res;
-									sirka_config[GYRO_RES] = *gyro_res;
+//									sirka_config[SIRKA_ADDRESS] = *address;
+//									sirka_config[ACC_RES] = *acc_res;
+//									sirka_config[GYRO_RES] = *gyro_res;
 									sirka_config[MAG_RES] = received_frame[PARAMETER];
 									ErasePage(sirka_save);
 									WriteWord(sirka_save,&sirka_config,8);
@@ -270,7 +283,7 @@ int main(void)
 						/*
 						 * Sends all Data got from last Broadcast command, resets BroadcastID
 						 */
-						case 0x16:	send_data_all_bcid(gyrodata,accdata,magdata,bcid);
+						case 0x16:	send_data_all(gyrodata,accdata,magdata,true);
 									bcid = 0;
 									break;
 
@@ -332,8 +345,37 @@ int main(void)
 									getAccData(accdata,received_frame[PARAMETER]);
 									getMagData_forced(magdata);
 									bcid = received_frame[BCID];
-
 									break;
+						/*
+						 * Reset Systime
+						 */
+				  	  	  case 0x01:
+				  	  		  	  	systime = 0;
+				  	  		  	  	break;
+
+				  	  	  case 0x02:
+				  	  		  	  	if ( sirka_config[SIRKA_ADDRESS] == 0x03 )
+				  	  		  	  	{
+				  	  		  	  		send_data_all(gyrodata,accdata,magdata,true);
+				  	  		  	  	}
+				  	  		  	  	else
+				  	  		  	  	{
+//				  	  		  	  		int systime_old = systime;
+				  	  		  	  		delayfunc(30);
+				  	  		  	  		received_frame[23] = 40;
+				  	  		  	  		while( received_frame[23] != (sirka_config[SIRKA_ADDRESS]-1) )
+				  	  		  	  		{
+				  	  		  	  			frame_position = 0;					// points to last received frame byte
+											received_frame[LENGTH] = 30;
+											while( frame_position !=  received_frame[LENGTH] )			// stay in sleep mode while not received frame length and address
+											{
+												EMU_EnterEM1();
+											}
+				  	  		  	  		}
+				  	  		  	  			send_data_all(gyrodata,accdata,magdata,true);
+				  	  		  	  	}
+				  	  		  	  	break;
+
 				  }
 			  }
 			  } // End Preamble-Check

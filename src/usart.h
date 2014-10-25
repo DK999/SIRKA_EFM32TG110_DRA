@@ -16,8 +16,7 @@
 
 void print_byte(uint8_t byte);
 void send_data(int16_t Data[],uint8_t type);
-void send_data_all(int16_t Gyr[], int16_t Acc[], int16_t Mag[]);
-void send_data_all_bcid(int16_t Gyr[], int16_t Acc[], int16_t Mag[], int8_t bcid);
+void send_data_all(int16_t Gyr[], int16_t Acc[], int16_t Mag[],uint8_t broadcast);
 void send_resolution(uint8_t Config[]);
 
 #endif /* USART_H_ */

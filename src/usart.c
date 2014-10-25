@@ -11,6 +11,9 @@
 #define USART_CS_PORT 2
 #define USART_CS_PIN 14
 
+extern uint8_t sirka_config[8];
+extern uint32_t systime;
+extern uint8_t bcid;
 
 // This function is used to display bytes over UART
 void print_byte(uint8_t byte) {
@@ -72,14 +75,16 @@ void send_data(int16_t Data[],uint8_t type)
 	GPIO->P[USART_CS_PORT].DOUTCLR = (1 << USART_CS_PIN);					// Clear RS485 for Read
 }
 
-void send_data_all(int16_t Gyr[], int16_t Acc[], int16_t Mag[])
-{	uint8_t byte[24];
+void send_data_all(int16_t Gyr[], int16_t Acc[], int16_t Mag[],uint8_t broadcast)
+{	uint8_t byte[28];
 	uint8_t counter = 4;
+	uint32_t systime_temp;
 	volatile uint16_t crc = 0x0000;
 
 	byte[0]= 0xAA;									// Add PREAMBLE, LENGTH and HOST ADDRESS
 	byte[1]= 0xAA;
 	byte[2]= 0x18;
+
 	byte[3]= 0x00;
 
 	for ( int i = 0; i < 3 ; i++)					// Add X,Y,Z of Gyro (LSB First)
@@ -100,56 +105,25 @@ void send_data_all(int16_t Gyr[], int16_t Acc[], int16_t Mag[])
 		byte[counter+1] = (uint8_t) (Mag[i] >> 8);
 		counter+=2;
 	}
-	GPIO->P[USART_CS_PORT].DOUTSET = (1 << USART_CS_PIN);	// Set RS485 for Write
 
-	for ( int i = 0; i < 22 ; i++)
-	{
-		crc = CRC16(crc,byte[i]);				// create CRC
-		print_byte(byte[i]);					// Send bytes
+
+	if(broadcast == 1)								// if last broadcast should be sent
+	{	systime_temp = systime;						// save systime in case of IRQ
+		byte[2]= 0x1D;								// change length to new packet size
+		byte[22]=bcid;								// add BCID
+		byte[23]=sirka_config[0];					// Add Address of Device
+		byte[24] = (uint8_t) systime_temp;			// Add Systime
+		byte[25] = (uint8_t) (systime_temp >> 8);
+		byte[26] = (uint8_t) (systime_temp >> 16);
+		byte[27] = (uint8_t) (systime_temp >> 24);
+		counter = 28;								// change duration of for loop to new size
 	}
-	byte[0] = (uint8_t)crc;						// split CRC in two bytes
-	byte[1] = (uint8_t)(crc >> 8 );
-
-	print_byte(byte[0]);						// send CRC LSB
-	print_byte(byte[1]);						// send CRC MSB
-
-	GPIO->P[USART_CS_PORT].DOUTCLR = (1 << USART_CS_PIN);					// Clear RS485 for Read
-
-}
-
-void send_data_all_bcid(int16_t Gyr[], int16_t Acc[], int16_t Mag[], int8_t bcid)
-{	uint8_t byte[23];
-	uint8_t counter = 4;
-	volatile uint16_t crc = 0x0000;
-
-	byte[0]= 0xAA;		// Add PREAMBLE, LENGTH and HOST ADDRESS
-	byte[1]= 0xAA;
-	byte[2]= 0x19;
-	byte[3]= 0x00;
-
-	for ( int i = 0; i < 3 ; i++)				// Add X,Y,Z of Gyro (LSB First)
-	{
-		byte[counter] = (uint8_t) Gyr[i];
-		byte[counter+1] = (uint8_t) (Gyr[i] >> 8);
-		counter+=2;
-	}
-	for ( int i = 0; i < 3 ; i++)				// Add X,Y,Z of Acc (LSB First)
-	{
-		byte[counter] = (uint8_t) Acc[i];
-		byte[counter+1] = (uint8_t) (Acc[i] >> 8);
-		counter+=2;
-	}
-	for ( int i = 0; i < 3 ; i++)				// Add X,Y,Z of Magnet (LSB First)
-	{
-		byte[counter] = (uint8_t) Mag[i];
-		byte[counter+1] = (uint8_t) (Mag[i] >> 8);
-		counter+=2;
-	}
-	byte[22]=bcid;								// Add BroadcastID
+	else
+		counter = 22;								// set duration of for loop
 
 	GPIO->P[USART_CS_PORT].DOUTSET = (1 << USART_CS_PIN);	// Set RS485 for Write
 
-	for ( int i = 0; i < 23 ; i++)
+	for ( int i = 0; i < counter ; i++)
 	{
 		crc = CRC16(crc,byte[i]);				// create CRC
 		print_byte(byte[i]);					// Send bytes

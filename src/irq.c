@@ -32,8 +32,8 @@ void enable_interrupts(void)
  * starts timer if transmission gets interrupted
  */
 void USART0_RX_IRQHandler(void)
-{
-	if(frame_position == 0)			// Start Timer when receiving first IRQ
+{	TIMER0_stop();
+//	if(frame_position == 0)			// Start Timer when receiving first IRQ
 			TIMER0_start();
 	received_frame[frame_position++] = USART0->RXDATA;
 	if(frame_position == received_frame[2])				// if full frame received deactivate timer
@@ -48,7 +48,7 @@ void TIMER0_IRQHandler(void)
 TIMER0_intclear();      			// Clear overflow flag
 TIMER0_stop();					// disable timer
 frame_position = 0;				// error while getting frame, reset frame position to zero
-received_frame[2] = 10;			// give PACKET-LENGTH a fixed value
+received_frame[2] = 30;			// give PACKET-LENGTH a fixed value
 }
 
 void TIMER1_IRQHandler(void)
