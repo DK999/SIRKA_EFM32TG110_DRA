@@ -361,15 +361,17 @@ int main(void)
 				  	  		  	  	else
 				  	  		  	  	{
 //				  	  		  	  		int systime_old = systime;
-				  	  		  	  		delayfunc(30);
+				  	  		  	  		volatile uint32_t timeout=1;
 				  	  		  	  		received_frame[23] = 40;
-				  	  		  	  		while( received_frame[23] != (sirka_config[SIRKA_ADDRESS]-1) )
+
+				  	  		  	  		while( received_frame[23] != (sirka_config[SIRKA_ADDRESS]-1) && (timeout > 0) )
 				  	  		  	  		{
+				  	  		  	  			timeout = 100*sirka_config[SIRKA_ADDRESS];
 				  	  		  	  			frame_position = 0;					// points to last received frame byte
 											received_frame[LENGTH] = 30;
-											while( frame_position !=  received_frame[LENGTH] )			// stay in sleep mode while not received frame length and address
+											while( frame_position !=  received_frame[LENGTH] && (timeout > 0))			// stay in sleep mode while not received frame length and address
 											{
-												EMU_EnterEM1();
+												--timeout;
 											}
 				  	  		  	  		}
 				  	  		  	  			send_data_all(gyrodata,accdata,magdata,true);
