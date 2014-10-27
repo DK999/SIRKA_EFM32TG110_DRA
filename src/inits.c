@@ -75,10 +75,10 @@ void GPIO_Init(void)
 void Timer_Init(void)
 {
 	TIMER0->CTRL = 0x40;
-	TIMER0->TOP = 0x140;		// 10탎
+	TIMER0->TOP = 0x140;						// 10탎
 
-	TIMER1->CTRL = 0x40;
-	TIMER1->TOP = 0xA0;		// Set Top to 160 for 5탎 interrupt
+	TIMER1->CTRL = ( 5 << 24 ) | ( 1 << 7 );	// Set Prescaler to 32 for 1탎
+	TIMER1->TOP = 0xFFFF;						// Set Top to FFFF
 }
 
 

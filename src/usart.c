@@ -12,7 +12,8 @@
 #define USART_CS_PIN 14
 
 extern uint8_t sirka_config[8];
-extern uint32_t systime;
+extern uint16_t systime;
+extern uint32_t systime_rec;
 extern uint8_t bcid;
 
 // This function is used to display bytes over UART
@@ -87,7 +88,6 @@ void send_data(int16_t Data[],uint8_t type)
 void send_data_all(int16_t Gyr[], int16_t Acc[], int16_t Mag[],uint8_t broadcast)
 {	uint8_t byte[28];
 	uint8_t counter = 4;
-	uint32_t systime_temp;
 	volatile uint16_t crc = 0x0000;
 
 	byte[0]= 0xAA;									// Add PREAMBLE, LENGTH and HOST ADDRESS
@@ -117,14 +117,14 @@ void send_data_all(int16_t Gyr[], int16_t Acc[], int16_t Mag[],uint8_t broadcast
 
 
 	if(broadcast == 1)								// if last broadcast should be sent
-	{	systime_temp = systime;						// save systime in case of IRQ
+	{
 		byte[2]= 0x1D;								// change length to new packet size
 		byte[22]=bcid;								// add BCID
 		byte[23]=sirka_config[0];					// Add Address of Device
-		byte[24] = (uint8_t) systime_temp;			// Add Systime
-		byte[25] = (uint8_t) (systime_temp >> 8);
-		byte[26] = (uint8_t) (systime_temp >> 16);
-		byte[27] = (uint8_t) (systime_temp >> 24);
+		byte[24] = (uint8_t) systime_rec;			// Add Systime
+		byte[25] = (uint8_t) (systime_rec >> 8);
+		byte[26] = (uint8_t) (systime_rec >> 16);
+		byte[27] = (uint8_t) (systime_rec >> 24);
 		counter = 28;								// change duration of for loop to new size
 	}
 	else

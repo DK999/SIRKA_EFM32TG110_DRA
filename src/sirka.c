@@ -47,7 +47,8 @@ enum sensors
 	Magnetometer,
 	Temperature
 };
-volatile uint32_t systime = 0;
+volatile uint16_t systime = 0;
+volatile uint32_t systime_rec = 0;
 int16_t gyrodata[3] = { 0, 0, 0};
 int16_t accdata[3] = { 0, 0, 0};
 int16_t magdata[4] = { 0, 0, 0, 0};
@@ -345,15 +346,23 @@ int main(void)
 									getAccData(accdata,received_frame[PARAMETER]);
 									getMagData_forced(magdata);
 									bcid = received_frame[BCID];
+									systime_rec = 0;						// Set systime_rec to 0 for OR operation
+									TIMER1_stop(0);							// Stop Timer
+									systime_rec = (uint16_t) systime;		// Set first 16Bit
+									systime_rec <<= 16;						// Shift 16Bit left to higher values
+									systime_rec |= (uint16_t) TIMER1->CNT;	// Do OR with 16Bit Timer Counter
+									TIMER1_start();							// Start Timer again
 									break;
 						/*
 						 * Reset Systime
 						 */
 				  	  	  case 0x01:
-				  	  		  	  	systime = 0;
+				  	  		  	  	TIMER1_stop(1);				// Stop Timer1 complete and reset CNT
+				  	  		  	  	systime = 0;				// Reset Systime
+				  	  		  	  	TIMER1_start();				// Start Counter again
 				  	  		  	  	break;
 				  	  	/*
-				  	  	 * Send data all chain
+				  	  	 * Send data Broadcast chain
 				  	  	 */
 				  	  	  case 0x02:
 				  	  		  	  	if ( sirka_config[SIRKA_ADDRESS] == 0x01 )

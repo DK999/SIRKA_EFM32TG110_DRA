@@ -11,7 +11,7 @@
 
 extern uint8_t received_frame[30];
 extern short frame_position;
-extern uint32_t systime;
+extern uint16_t systime;
 
 void enable_interrupts(void)
 {
@@ -53,9 +53,13 @@ received_frame[2] = 30;			// give PACKET-LENGTH a fixed value
 
 void TIMER1_IRQHandler(void)
 {
-TIMER1_stop();						// stop TIMER
-TIMER1_intclear();      			// Clear overflow flag
-systime+=5;							// Add 5µs to Systime
-TIMER1_start();						// start TIMER again
+if ( TIMER1->IF & (1 << 0))
+{
+	TIMER1_stop(0);						// stop TIMER without reset
+	TIMER1_intclear();      			// Clear overflow flag
+	systime+=0b1;						// Add 1µs to Systime 16-32
+	TIMER1_start();						// start TIMER again
+}
+
 }
 

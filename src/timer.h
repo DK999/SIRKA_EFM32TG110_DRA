@@ -14,6 +14,6 @@ void TIMER0_start(void);
 void TIMER0_stop(void);
 void TIMER0_intclear(void);
 void TIMER1_start(void);
-void TIMER1_stop(void);
+void TIMER1_stop(uint8_t reset);
 void TIMER1_intclear(void);
 #endif /* TIMER_H_ */

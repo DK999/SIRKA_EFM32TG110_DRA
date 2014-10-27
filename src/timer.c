@@ -29,11 +29,12 @@ void TIMER1_start(void)
 	TIMER1->CMD = ( 1 << 0 );
 }
 
-void TIMER1_stop(void)
+void TIMER1_stop(uint8_t reset)
 {
 
 	TIMER1->CMD = ( 1 << 1 );
-	TIMER1->CNT = 0;
+	if ( reset == 1 )
+		TIMER1->CNT = 0;
 }
 
 void TIMER1_intclear(void)
