@@ -118,7 +118,7 @@ void send_data_all(int16_t Gyr[], int16_t Acc[], int16_t Mag[],uint8_t broadcast
 
 	if(broadcast == 1)								// if last broadcast should be sent
 	{
-		byte[2]= 0x1D;								// change length to new packet size
+		byte[2]= 0x1E;								// change length to new packet size 30
 		byte[22]=bcid;								// add BCID
 		byte[23]=sirka_config[0];					// Add Address of Device
 		byte[24] = (uint8_t) systime_rec;			// Add Systime
