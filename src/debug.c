@@ -126,8 +126,8 @@ void selftest_Acc(int16_t Data_difference[],uint8_t *setting)
 	SPI_WriteByte(0xB6);		 // set reset
 	CS_Pin_set(SPI_CS_ACC_pin);
 
-	arithmetic_average(rx_data_plus,Data_plus,6,1);
-	arithmetic_average(rx_data_minus,Data_minus,6,1);
+	arithmetic_average(rx_data_plus,Data_plus,6,1,0);
+	arithmetic_average(rx_data_minus,Data_minus,6,1,0);
 
 	Data_difference[0] = Data_plus[0] - Data_minus[0];
 	Data_difference[1] = Data_plus[1] - Data_minus[1];

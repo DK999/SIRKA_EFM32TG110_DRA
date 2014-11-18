@@ -41,14 +41,29 @@ void ItoA( int z, char* Buffer )
 
 /*
  * Calculates the arithmetic average of duration / meas_per_cycle measurements
+ * Type defines wether it's ACC or Gyro Data, needed because of different storage types of BMX055 Sensor
  */
-void arithmetic_average ( uint8_t rx_data[],int16_t Data[],uint16_t duration,uint8_t meas_per_cycle)
+void arithmetic_average ( uint8_t rx_data[],int16_t Data[],uint16_t duration,uint8_t meas_per_cycle, uint8_t type)
 {	/*
 	 * Create Temp Variable for adding values
 	 */
 	int32_t Tempx = 0;
 	int32_t Tempy = 0;
 	int32_t Tempz = 0;
+	uint8_t byte_shift_msb = 0;
+	uint8_t byte_shift_lsb = 0;
+
+	if ( type == 0 )				// If Type is ACC, shift MSB 4 Bit left and LSB 4 Bit right
+	{
+		byte_shift_msb = 4;
+		byte_shift_lsb = 4;
+	}
+
+	else if ( type == 1)			// If Type is Gyr, shift MSB 8 Bit left and LSB 0 Bit right
+	{
+		byte_shift_msb = 8;
+		byte_shift_lsb = 0;
+	}
 	/*
 	 * Copy both Bytes into one 16Bit signed integer, then add to Temp-Variables
 	 * duration describes how many cycles the measurement lasts, total amount of cycles by duration / meas_per_cycle
@@ -56,16 +71,16 @@ void arithmetic_average ( uint8_t rx_data[],int16_t Data[],uint16_t duration,uin
 	for ( int i = 0; i<duration; i+=meas_per_cycle)
 	{
 		Data[0] = (int8_t) rx_data[i+1]; 		// Cast MSB X to int8_t and make it signed in 16Bit Array
-		Data[0] <<=4;							// Shift MSB X 4 Bits left to have space for LSB X
-		Data[0] |= (rx_data[i] >> 4);			// Do OR with first 4 Bits of LSB X
+		Data[0] <<=byte_shift_msb;							// Shift MSB X 4 Bits left to have space for LSB X
+		Data[0] |= (rx_data[i] >> byte_shift_lsb);			// Do OR with first 4 Bits of LSB X
 		Tempx += Data[0];						// Add Data to Temp-Var
 		Data[1] = (int8_t) rx_data[i+3];		// Cast MSB Y to int8_t and make it signed in 16Bit Array
-		Data[1] <<=4;							// Shift MSB X 4 Bits left to have space for LSB X
-		Data[1] |= (rx_data[i+2] >> 4);			// Do OR with first 4 Bits of LSB X
+		Data[1] <<=byte_shift_msb;							// Shift MSB X 4 Bits left to have space for LSB X
+		Data[1] |= (rx_data[i+2] >> byte_shift_lsb);			// Do OR with first 4 Bits of LSB X
 		Tempy += Data[1];						// Add Data to Temp-Var
 		Data[2] = (int8_t) rx_data[i+5];		// Cast MSB Z to int8_t and make it signed in 16Bit Array
-		Data[2] <<=4;							// Shift MSB Z 4 Bits left to have space for LSB Z
-		Data[2] |= (rx_data[i+4] >> 4);			// Do OR with first 4 Bits of LSB Z
+		Data[2] <<=byte_shift_msb;							// Shift MSB Z 4 Bits left to have space for LSB Z
+		Data[2] |= (rx_data[i+4] >> byte_shift_lsb);			// Do OR with first 4 Bits of LSB Z
 		Tempz += Data[2];						// Add Data to Temp-Var
 	}
 	/*

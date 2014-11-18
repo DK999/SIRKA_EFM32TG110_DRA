@@ -75,7 +75,7 @@ void getGyrData(int16_t Data[], int16_t measurements){
 		/*
 		 * Sort Data from Accelerometer
 		 */
-		arithmetic_average(rx_data,Data,(6*measurements),6);
+		arithmetic_average(rx_data,Data,(6*measurements),6,1);
 }
 
 /*
@@ -103,7 +103,7 @@ void getAccData(int16_t Data[], int16_t measurements){
 	/*
 	 * Sort Data from Accelerometer
 	 */
-	arithmetic_average(rx_data,Data,(6*measurements),6);
+	arithmetic_average(rx_data,Data,(6*measurements),6,0);
 
 }
 
@@ -226,9 +226,11 @@ void setup_Mag(uint8_t preset){
  * 0x08		= +- 8g Range,	3,91mg/LSB
  * 0x0C		= +-16g Range,	7,81mg/LSB
  */
-void setup_Acc(uint8_t range){
+void setup_Acc(uint8_t range, uint8_t bandwidth){
 	if( !((range == 0x0C) | (range == 0x08) | (range == 0x05) | (range == 0x03)) )			// 2g Range standard
 		range = 0x03;
+	if( !((bandwidth == 0x0F) | (bandwidth == 0x0E) | (bandwidth == 0x0D) | (bandwidth == 0x0C) | (bandwidth == 0x0B) | (bandwidth == 0x0A) | (bandwidth == 0x09) | (bandwidth == 0x08)) )			// Sets bandwidth
+		bandwidth = 0x0F;
 
 	CS_Pin_clr(SPI_CS_ACC_pin);	 // Clear CS
 	SPI_WriteByte(0x14);		 // send BGW_Softreset command
@@ -240,7 +242,7 @@ void setup_Acc(uint8_t range){
 	CS_Pin_set(SPI_CS_ACC_pin);
 	CS_Pin_clr(SPI_CS_ACC_pin);	 // Clear CS
 	SPI_WriteByte(0x10);		 // send WRITE to Sensor Control command
-	SPI_WriteByte(0x0F);		 // set to 1000HZ
+	SPI_WriteByte(bandwidth);	 // Set Bandwidth
 	CS_Pin_set(SPI_CS_ACC_pin);
 	CS_Pin_clr(SPI_CS_ACC_pin);	 // Clear CS
 	SPI_WriteByte(0x11);		 // send WRITE to Sensor Control command
@@ -259,11 +261,15 @@ void setup_Acc(uint8_t range){
  * 0x03		= +-250°/s  Range,   7,6 m°/s / LSB
  * 0x04		= +-125°/s  Range,   3,8m°/s  / LSB
  */
-void setup_Gyro(uint8_t range){
+void setup_Gyro(uint8_t range, uint8_t bandwidth){
 	if(!( (range == 0x00) | (range == 0x01) | (range == 0x02) | (range == 0x03) | (range == 0x04) ))			// 2000°/s , 1000°/s, 500°/s, 250°/s, 125°/s Range
 		{
 			range = 0x00;
 		}
+	if(!( (bandwidth == 0x00) | (bandwidth == 0x01) | (bandwidth == 0x02) | (bandwidth == 0x03) | (bandwidth == 0x04) | (bandwidth == 0x05) | (bandwidth == 0x06) )) // checks for valid bandwidth
+			{
+				bandwidth = 0x00;
+			}
 	CS_Pin_clr(SPI_CS_GYR_pin);	 // Clear CS
 	SPI_WriteByte(0x14);		 // send BGW_Softreset command
 	SPI_WriteByte(0xB6);		 // set reset
@@ -275,7 +281,7 @@ void setup_Gyro(uint8_t range){
 	SPI_WriteByte(range);		 // set to defined range
 	CS_Pin_set(SPI_CS_GYR_pin);
 	SPI_WriteByte(0x10);		 // send WRITE to Bandwith Control command
-	SPI_WriteByte(0x02);		 // set to 1000HZ
+	SPI_WriteByte(bandwidth);	 // set Bandwidth
 	CS_Pin_set(SPI_CS_GYR_pin);
 	CS_Pin_clr(SPI_CS_GYR_pin);	 // Clear CS
 	SPI_WriteByte(0x11);		 // send WRITE to Powermodes Control command

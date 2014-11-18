@@ -13,6 +13,6 @@
 #include "BMX055.h"
 
 void ItoA( int z, char* Buffer );
-void arithmetic_average ( uint8_t rx_data[],int16_t Data[],uint16_t duration,uint8_t meas_per_cycle);
+void arithmetic_average ( uint8_t rx_data[],int16_t Data[],uint16_t duration,uint8_t meas_per_cycle, uint8_t type);
 
 #endif /* CALC_H_ */

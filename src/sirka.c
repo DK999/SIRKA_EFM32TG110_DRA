@@ -27,6 +27,7 @@
 #define ADDRESS 3
 #define COMMAND 4
 #define PARAMETER 5
+#define PARAMETER_TWO 6
 #define BCID 6
 //#define CRCL 6
 //#define CRCH 7
@@ -130,8 +131,8 @@ int main(void)
   /* Init SPI, USART, GPIO and Clocks  */
   interface_init();
   /* Setting up BMX055 with default values */
-  setup_Acc(sirka_config[ACC_RES]);
-  setup_Gyro(sirka_config[GYRO_RES]);
+  setup_Acc(sirka_config[ACC_RES],0x0F);
+  setup_Gyro(sirka_config[GYRO_RES],0);
   setup_Mag(sirka_config[MAG_RES]);
   setup_Gyro_Range(sirka_config[GYRO_RES]);
   /* Configure Interrupt handling */
@@ -223,7 +224,7 @@ int main(void)
 						 */
 						case 0x06:	selftest_Acc(accdata,&settings_acc);
 									send_data(accdata,Accelerometer);
-									setup_Acc(settings_acc);
+									setup_Acc(settings_acc,0x0F);
 									break;
 						/*
 						 *  Do selftest of Magnetometer
@@ -233,7 +234,8 @@ int main(void)
 						/*
 						 *  Set Gyrometer Range +-2000°/s down to +-125°/s
 						 */
-						case 0x10:	setup_Gyro_Range(received_frame[PARAMETER]);
+						case 0x10:	//setup_Gyro_Range(received_frame[PARAMETER]);
+									setup_Gyro(received_frame[PARAMETER],received_frame[PARAMETER_TWO]);
 //									sirka_config[SIRKA_ADDRESS] = *address;
 //									sirka_config[ACC_RES] = *acc_res;
 									sirka_config[GYRO_RES] = received_frame[PARAMETER];
@@ -244,7 +246,7 @@ int main(void)
 						/*
 						 *  Set Accelerometer Range 2g up to 16g
 						 */
-						case 0x11:	setup_Acc(received_frame[PARAMETER]);
+						case 0x11:	setup_Acc(received_frame[PARAMETER],received_frame[PARAMETER_TWO]);
 //									sirka_config[SIRKA_ADDRESS] = *address;
 									sirka_config[ACC_RES] = received_frame[PARAMETER];
 //									sirka_config[GYRO_RES] = *gyro_res;
