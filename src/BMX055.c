@@ -266,7 +266,7 @@ void setup_Gyro(uint8_t range, uint8_t bandwidth){
 		{
 			range = 0x00;
 		}
-	if(!( (bandwidth == 0x00) | (bandwidth == 0x01) | (bandwidth == 0x02) | (bandwidth == 0x03) | (bandwidth == 0x04) | (bandwidth == 0x05) | (bandwidth == 0x06) )) // checks for valid bandwidth
+	if(!( (bandwidth == 0x00) | (bandwidth == 0x01) | (bandwidth == 0x02) | (bandwidth == 0x03) | (bandwidth == 0x04) | (bandwidth == 0x05) | (bandwidth == 0x06) | (bandwidth == 0x07))) // checks for valid bandwidth
 			{
 				bandwidth = 0x00;
 			}
