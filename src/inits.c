@@ -26,7 +26,7 @@
 void SPI_Init(void)
 {	USART1->CTRL = 0x401;
 	USART1->FRAME = 0x1005;
-	USART1->CLKDIV = 0x400;
+	USART1->CLKDIV = 0x100;
 	USART1->CMD = (1 << 11) | (1 << 10) | (1 << 4) | (1 << 2) | (1 << 0);
 	USART1->IFC = 0x1FF9;
 	USART1->ROUTE = 0xB;
@@ -38,7 +38,7 @@ void SPI_Init(void)
 void USART_Init(void)
 {
 	/*
-	 * Geschwindigkeiten für USART
+	 * Geschwindigkeiten fï¿½r USART
 	 * CLKDIV -> 0x100 = 1MBit/s	16x OVS
 	 * CLKDIV -> 0x40 = 1,5MBit/s	16x OVS
 	 * CLKDIV -> 0x0 = 2MBit/s		16x OVS
@@ -75,9 +75,9 @@ void GPIO_Init(void)
 void Timer_Init(void)
 {
 	TIMER0->CTRL = 0x40;
-	TIMER0->TOP = 0x140;						// 10µs
+	TIMER0->TOP = 0x140;						// 10ï¿½s
 
-	TIMER1->CTRL = ( 5 << 24 ) | ( 1 << 7 );	// Set Prescaler to 32 for 1µs
+	TIMER1->CTRL = ( 5 << 24 ) | ( 1 << 7 );	// Set Prescaler to 32 for 1ï¿½s
 	TIMER1->TOP = 0xFFFF;						// Set Top to FFFF
 }
 

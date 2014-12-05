@@ -55,7 +55,7 @@ void interface_init(){
  */
 void getGyrData(int16_t Data[], int16_t measurements){
 	uint8_t rx_data[192];			 // Temp Variable to store Sensor Measurements
-	if( (measurements != 0x01) ||  (measurements != 0x04) ||  (measurements != 0x08) ||  (measurements != 0x10) )
+	if( (measurements != 0x01) &&  (measurements != 0x04) &&  (measurements != 0x08) &&  (measurements != 0x10) )
 		measurements = 0x10;
 		/*
 		 * Get the Data from Accelerometer
@@ -83,7 +83,7 @@ void getGyrData(int16_t Data[], int16_t measurements){
  */
 void getAccData(int16_t Data[], int16_t measurements){
 	uint8_t rx_data[192];			 // Temp Variable to store Sensor Measurements
-	if( (measurements != 0x01) ||  (measurements != 0x04) ||  (measurements != 0x08) ||  (measurements != 0x10) )
+	if( (measurements != 0x01) &&  (measurements != 0x04) &&  (measurements != 0x08) &&  (measurements != 0x10) )
 			measurements = 0x10;
 	/*
 	 * Get the Data from Accelerometer
@@ -125,7 +125,7 @@ void getMagData_forced(int16_t Data[]){
 	SPI_WriteByte(0x2A);		 // set to 20HZ and Forced Mode ( OpMode 01 )
 	CS_Pin_set(SPI_CS_MAG_pin);
 	if ( XY == 0x01 )
-		delayfunc(320); 		// wait 100µs for measurement
+		delayfunc(320); 		// wait 100ï¿½s for measurement
 	else if ( XY == 0x04 )
 		delayfunc(320000);		// wait 10ms for measurement
 	else if ( XY == 0x07 )
@@ -171,9 +171,9 @@ void getMagData_forced(int16_t Data[]){
  * 0x01 	= 9 / 15 Measurements, 100Hz possible
  * 0x02 	= 15 / 27 Measurements, 50Hz possible
  * 0x03+ 	= 47 / 83 Measurements, 20Hz possible
- * Resolution is fixed to 0,3 µT / LSB
- * Maximum Resolution X/Y = +- 1300µT
- * Maximum Resolution Z   = +- 2500µT
+ * Resolution is fixed to 0,3 ï¿½T / LSB
+ * Maximum Resolution X/Y = +- 1300ï¿½T
+ * Maximum Resolution Z   = +- 2500ï¿½T
  */
 void setup_Mag(uint8_t preset){
 	if( preset == 0x00 )		// XY = 3, Z = 3
@@ -255,18 +255,18 @@ void setup_Acc(uint8_t range, uint8_t bandwidth){
 }
 /*
  * Sets up Gyrometer
- * 0x00 	= +-2000°/s Range,  61,0 m°/s / LSB
- * 0x01		= +-1000°/s Range,  30,5 m°/s / LSB
- * 0x02		= +-500°/s  Range,  15,3 m°/s / LSB
- * 0x03		= +-250°/s  Range,   7,6 m°/s / LSB
- * 0x04		= +-125°/s  Range,   3,8m°/s  / LSB
+ * 0x00 	= +-2000ï¿½/s Range,  61,0 mï¿½/s / LSB
+ * 0x01		= +-1000ï¿½/s Range,  30,5 mï¿½/s / LSB
+ * 0x02		= +-500ï¿½/s  Range,  15,3 mï¿½/s / LSB
+ * 0x03		= +-250ï¿½/s  Range,   7,6 mï¿½/s / LSB
+ * 0x04		= +-125ï¿½/s  Range,   3,8mï¿½/s  / LSB
  */
 void setup_Gyro(uint8_t range, uint8_t bandwidth){
-	if(!( (range == 0x00) | (range == 0x01) | (range == 0x02) | (range == 0x03) | (range == 0x04) ))			// 2000°/s , 1000°/s, 500°/s, 250°/s, 125°/s Range
+	if(!( (range == 0x00) | (range == 0x01) | (range == 0x02) | (range == 0x03) | (range == 0x04) ))			// 2000ï¿½/s , 1000ï¿½/s, 500ï¿½/s, 250ï¿½/s, 125ï¿½/s Range
 		{
 			range = 0x00;
 		}
-	if(!( (bandwidth == 0x00) | (bandwidth == 0x01) | (bandwidth == 0x02) | (bandwidth == 0x03) | (bandwidth == 0x04) | (bandwidth == 0x05) | (bandwidth == 0x06) | (bandwidth == 0x07))) // checks for valid bandwidth
+	if(!( (bandwidth == 0x00) | (bandwidth == 0x01) | (bandwidth == 0x02) | (bandwidth == 0x03) | (bandwidth == 0x04) | (bandwidth == 0x05) | (bandwidth == 0x06) )) // checks for valid bandwidth
 			{
 				bandwidth = 0x00;
 			}
@@ -297,7 +297,7 @@ void setup_Gyro(uint8_t range, uint8_t bandwidth){
  * Sets Range of Gyroscope
  */
 void setup_Gyro_Range(uint8_t range){
-	if(!( (range == 0x00) | (range == 0x01) | (range == 0x02) | (range == 0x03) | (range == 0x04) ))			// 2000°/s , 1000°/s, 500°/s, 250°/s, 125°/s Range
+	if(!( (range == 0x00) | (range == 0x01) | (range == 0x02) | (range == 0x03) | (range == 0x04) ))			// 2000ï¿½/s , 1000ï¿½/s, 500ï¿½/s, 250ï¿½/s, 125ï¿½/s Range
 		{
 			range = 0x00;
 		}
@@ -307,7 +307,7 @@ void setup_Gyro_Range(uint8_t range){
 	CS_Pin_set(SPI_CS_GYR_pin);
 }
 /*
- * Changes µC Address
+ * Changes ï¿½C Address
  */
 
 void setup_Address(uint8_t address)
