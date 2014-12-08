@@ -1,0 +1,7 @@
+/CMSIS/
+/emlib/
+/makefile
+/objects.mk
+/sources.mk
+/src/
+*.o

@@ -227,9 +227,9 @@ void setup_Mag(uint8_t preset){
  * 0x0C		= +-16g Range,	7,81mg/LSB
  */
 void setup_Acc(uint8_t range, uint8_t bandwidth){
-	if( !((range == 0x0C) | (range == 0x08) | (range == 0x05) | (range == 0x03)) )			// 2g Range standard
+	if( (range != 0x0C) && (range != 0x08) && (range != 0x05) && (range != 0x03) )			// 2g Range standard
 		range = 0x03;
-	if( !((bandwidth == 0x0F) | (bandwidth == 0x0E) | (bandwidth == 0x0D) | (bandwidth == 0x0C) | (bandwidth == 0x0B) | (bandwidth == 0x0A) | (bandwidth == 0x09) | (bandwidth == 0x08)) )			// Sets bandwidth
+	if( (bandwidth != 0x0F) && (bandwidth != 0x0E) && (bandwidth != 0x0D) && (bandwidth != 0x0C) && (bandwidth != 0x0B) && (bandwidth != 0x0A) && (bandwidth != 0x09) && (bandwidth != 0x08) )			// Sets bandwidth
 		bandwidth = 0x0F;
 
 	CS_Pin_clr(SPI_CS_ACC_pin);	 // Clear CS
@@ -262,11 +262,11 @@ void setup_Acc(uint8_t range, uint8_t bandwidth){
  * 0x04		= +-125�/s  Range,   3,8m�/s  / LSB
  */
 void setup_Gyro(uint8_t range, uint8_t bandwidth){
-	if(!( (range == 0x00) | (range == 0x01) | (range == 0x02) | (range == 0x03) | (range == 0x04) ))			// 2000�/s , 1000�/s, 500�/s, 250�/s, 125�/s Range
+	if( (range != 0x00) && (range != 0x01) && (range != 0x02) && (range != 0x03) && (range != 0x04) )			// 2000�/s , 1000�/s, 500�/s, 250�/s, 125�/s Range
 		{
 			range = 0x00;
 		}
-	if(!( (bandwidth == 0x00) | (bandwidth == 0x01) | (bandwidth == 0x02) | (bandwidth == 0x03) | (bandwidth == 0x04) | (bandwidth == 0x05) | (bandwidth == 0x06) )) // checks for valid bandwidth
+	if( (bandwidth != 0x00) && (bandwidth != 0x01) && (bandwidth != 0x02) && (bandwidth != 0x03) && (bandwidth != 0x04) && (bandwidth != 0x05) && (bandwidth != 0x06) ) // checks for valid bandwidth
 			{
 				bandwidth = 0x00;
 			}
@@ -297,7 +297,7 @@ void setup_Gyro(uint8_t range, uint8_t bandwidth){
  * Sets Range of Gyroscope
  */
 void setup_Gyro_Range(uint8_t range){
-	if(!( (range == 0x00) | (range == 0x01) | (range == 0x02) | (range == 0x03) | (range == 0x04) ))			// 2000�/s , 1000�/s, 500�/s, 250�/s, 125�/s Range
+	if( (range != 0x00) && (range != 0x01) && (range != 0x02) && (range != 0x03) && (range != 0x04) )			// 2000�/s , 1000�/s, 500�/s, 250�/s, 125�/s Range
 		{
 			range = 0x00;
 		}
